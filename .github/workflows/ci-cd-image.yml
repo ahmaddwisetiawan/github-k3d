@@ -7,6 +7,8 @@ on:
 
 env:
   IMAGE_NAME: "${{ secrets.DOCKER_USER }}/nginx-k3d"
+  # Menambahkan lokasi kubeconfig agar kubectl bisa akses cluster
+  KUBECONFIG: /home/student/.kube/config
 
 jobs:
   build-push-image:
@@ -36,9 +38,11 @@ jobs:
 
       - name: Install kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
+          if ! command -v kubectl &> /dev/null; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/
+          fi
 
       - name: Replace variables and output to webserver.yaml
         run: envsubst < webserver.yaml.template > webserver.yaml
