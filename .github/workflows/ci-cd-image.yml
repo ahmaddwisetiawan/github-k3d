@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE_NAME: "${{ secrets.DOCKER_USER }}/nginx-k3d"
-  # Menambahkan lokasi kubeconfig agar kubectl bisa akses cluster
+  # Menambahkan variabel environment agar kubectl tahu lokasi config cluster
   KUBECONFIG: /home/student/.kube/config
 
 jobs:
