@@ -42,24 +42,26 @@ jobs:
             sudo mv kubectl /usr/local/bin/
           fi
 
-      - name: Get Kubeconfig
+      - name: Setup Kubeconfig
         run: |
-          mkdir -p ~/.kube
-          sudo k3d kubeconfig get k3s-default > ~/.kube/config
-          sudo chown $USER:$USER ~/.kube/config
-          chmod 600 ~/.kube/config
+          mkdir -p $HOME/.kube
+          # Mengambil config cluster langsung dan simpan ke folder user student
+          sudo k3d kubeconfig get k3s-default > $HOME/.kube/config
+          sudo chown $USER:$USER $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
       - name: Replace variables
         run: envsubst < webserver.yaml.template > webserver.yaml
 
-      - name: Create deployment
+      - name: Deploy to K3D
         run: |
+          # Paksa kubectl menggunakan config yang baru dibuat
           export KUBECONFIG=$HOME/.kube/config
           kubectl apply -f webserver.yaml
           kubectl apply -f webserver-svc.yaml
 
-      - name: View status
+      - name: Verify
         run: |
           export KUBECONFIG=$HOME/.kube/config
-          kubectl get deployments
-          kubectl get services
+          kubectl get pods
+          kubectl get svc
