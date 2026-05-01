@@ -7,8 +7,6 @@ on:
 
 env:
   IMAGE_NAME: "${{ secrets.DOCKER_USER }}/nginx-k3d"
-  # Menambahkan variabel environment agar kubectl tahu lokasi config cluster
-  KUBECONFIG: /home/student/.kube/config
 
 jobs:
   build-push-image:
@@ -44,7 +42,13 @@ jobs:
             sudo mv kubectl /usr/local/bin/
           fi
 
-      - name: Replace variables and output to webserver.yaml
+      - name: Prepare Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          sudo k3d kubeconfig get k3s-default > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Replace variables
         run: envsubst < webserver.yaml.template > webserver.yaml
 
       - name: Create deployment
