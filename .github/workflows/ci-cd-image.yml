@@ -42,22 +42,24 @@ jobs:
             sudo mv kubectl /usr/local/bin/
           fi
 
-      - name: Prepare Kubeconfig
+      - name: Get Kubeconfig
         run: |
           mkdir -p ~/.kube
           sudo k3d kubeconfig get k3s-default > ~/.kube/config
+          sudo chown $USER:$USER ~/.kube/config
           chmod 600 ~/.kube/config
 
       - name: Replace variables
         run: envsubst < webserver.yaml.template > webserver.yaml
 
       - name: Create deployment
-        run: kubectl apply -f webserver.yaml
-
-      - name: Create service
-        run: kubectl apply -f webserver-svc.yaml
+        run: |
+          export KUBECONFIG=$HOME/.kube/config
+          kubectl apply -f webserver.yaml
+          kubectl apply -f webserver-svc.yaml
 
       - name: View status
         run: |
+          export KUBECONFIG=$HOME/.kube/config
           kubectl get deployments
           kubectl get services
